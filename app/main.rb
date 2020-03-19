@@ -38,7 +38,7 @@ end
 # (top_x,top_y) is the topmost corner, representing the map
 #   coordinate.
 # (
-def render_half(args,top_x,top_y, side_x,side_y,bottom_y,offx,offslope, tile)
+def render_half(out,top_x,top_y, side_x,side_y,bottom_y,offx,offslope, tile)
 
   # Combined slope of the top and bottom lines of the triangle formed
   # by this half of the quad. Effectively the amount of
@@ -54,7 +54,7 @@ def render_half(args,top_x,top_y, side_x,side_y,bottom_y,offx,offslope, tile)
 
     # ... render a 1 pixel wide strip of the tile texture.
     # "offslope" is an offset to account for rendering direction.
-    args.outputs.sprites << {
+    out.sprites << {
       x: stripx,
       y: top_y-h-dx*slope+offslope*slope,
       w: 1,
@@ -66,11 +66,7 @@ def render_half(args,top_x,top_y, side_x,side_y,bottom_y,offx,offslope, tile)
   end
 end
 
-def tick args
-  buf = args.render_target(:buf)
-
-  args.outputs.labels << [10, 700, "#{args.gtk.current_framerate.to_i} fps"]
-
+def render_map(out)
   $map.each_with_index do |rows, y|
     rows.each_with_index do |col, x|
       sx,sy, c = pos(x,y)        # Top
@@ -82,7 +78,7 @@ def tick args
       # args.outputs.labels << [sx, sy, "(#{x},#{y})"]
 
       # Wireframe
-      args.outputs.lines << [
+      out.lines << [
         [ sx, sy, sx2, sy2],
         [ sx2, sy2, sx4, sy4],
         [ sx4, sy4, sx3, sy3],
@@ -93,8 +89,17 @@ def tick args
       # by heiht for a simple test here.
       tile = (c == 0 && c2 == 0 && c3 == 0 && c4 == 0) ? "water" : "grass"
 
-      render_half(args,sx,sy,sx3,sy3,sy4,0,$tilew, tile)  # Left
-      render_half(args,sx,sy,sx2,sy2,sy4, $tilew,0, tile) # Right
+      render_half(out,sx,sy,sx3,sy3,sy4,0,$tilew, tile)  # Left
+      render_half(out,sx,sy,sx2,sy2,sy4, $tilew,0, tile) # Right
     end
   end
+end
+
+def tick args
+  if args.state.tick_count == 0
+    render_map(args.render_target(:map))
+  end
+
+  args.outputs.sprites << [0, 0, 1280, 720, :map]
+  args.outputs.labels << [10, 700, "#{args.gtk.current_framerate.to_i} fps"]
 end
