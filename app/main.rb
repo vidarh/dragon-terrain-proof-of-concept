@@ -105,10 +105,10 @@ def render_map(args, out)
       if args.state.show_wireframe
         # Wireframe
         out.lines << [
-          [ sx, sy, sx2, sy2],
-          [ sx2, sy2, sx4, sy4],
-          [ sx4, sy4, sx3, sy3],
-          [ sx3, sy3, sx, sy]
+          [ sx, sy, sx2, sy2, 128, 128, 128],
+          [ sx2, sy2, sx4, sy4, 128, 128, 128],
+          [ sx4, sy4, sx3, sy3, 128, 128, 128],
+          [ sx3+1, sy3, sx, sy, 128, 128, 128]
           ]
       end
 
