@@ -113,12 +113,39 @@ def render_map(args, out)
       end
 
       if args.state.fill
-        # "64" below refers to half the width of the tile sprites.
-        render_half(args, out,sx,sy,sx3,sy3,sy4,0,64, tile)  # Left
-        render_half(args, out,sx,sy,sx2,sy2,sy4, 64,0, tile) # Right
+        if c == c2 && c2 == c3 && c3 == c4
+          # If all four corners are at the same
+          # height, we don't need to apply any
+          # transformations
+          out.sprites << {
+            x: sx2,
+            y: sy,
+            w: sx3-sx2,
+            h: sy4-sy,
+            path: "sprites/#{tile}.png"
+          }
+
+        else
+          # "64" below refers to half the width of the tile sprites.
+          render_half(args, out,sx,sy,sx3,sy3,sy4,0,64, tile)  # Left
+          render_half(args, out,sx,sy,sx2,sy2,sy4, 64,0, tile) # Right
+        end
       end
     end
   end
+end
+
+
+
+def render_slice(args, y,ty, h, a)
+  args.outputs.sprites << {
+    x: 0,
+    y: 0,
+    w: 1280,
+    h: 720,
+    path: :map,
+    a: a
+  }
 end
 
 def tick args  #end
