@@ -35,6 +35,10 @@ def pos(tilew, tileh, hmul, x,y)
   if r.is_a?(Array)
     my = r[x] || 0
   else
+    # I apply a factor of 0.7 here, as pure
+    # integer multiples of the tile height looks
+    # odd. In a proper map representation I may
+    # make the height much more granular.
     my = r[x*2].to_i * hmul.to_f * 0.7
     tile = $tiletypes[r[x*2+1]]
   end
@@ -56,6 +60,8 @@ def render_half(args,out,top_x,top_y, side_x,side_y,bottom_y,offx,offslope, tile
   # *shear* we apply to the triangle.
 
   slope  = (top_y+bottom_y-2*side_y)/(2*side_x-2*top_x)*tilew/64
+  a = (0.5-slope) * 255 + 64
+  a = 128 if a < 128
 
   # For each x positin in the triangle....
   xr = [top_x,side_x]
@@ -70,6 +76,7 @@ def render_half(args,out,top_x,top_y, side_x,side_y,bottom_y,offx,offslope, tile
       y: top_y-h-dx*slope+offslope*slope,
       w: 1,
       h: h,
+      a: a,
       tile_x: offx+dx,
       tile_w: 1,
       path: "sprites/#{tile}.png"
@@ -77,10 +84,13 @@ def render_half(args,out,top_x,top_y, side_x,side_y,bottom_y,offx,offslope, tile
   end
 end
 
+
 def render_map(args, out)
   hmul  = args.state.height_multiplier
   tilew = args.state.tilew
   tileh = args.state.tileh
+
+  out.solids << [0, 0, 1280, 720, 0,0,0, 255]
   $map.each_with_index do |row, y|
     max_x = row.length/2
     (0...max_x).each do |x|
